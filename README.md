@@ -4,7 +4,11 @@
 
 ## 安装与使用
 
-源码仓库不包含预编译 APK。按下文「构建」生成 APK 后，将 `app/build/outputs/apk/debug/app-debug.apk`（调试版）或 `app/build/outputs/apk/release/app-release.apk`（正式版）复制到电视安装；本地交付包中的 `dist/LocalTV-1.0.0.apk` 也可直接安装。要求 Android 6.0 或以上，支持 ARM 32 位、ARM 64 位及 x86_64。电视须允许从文件管理器或 U 盘安装应用。安装后在应用列表中打开「映匣」。无需注册；首页的「先体验一下」可离线查看内置的照片、GIF 和视频。
+从 [GitHub Releases](https://github.com/Eric-kbo/yingbox-tv/releases/latest) 下载正式签名的 APK，或直接下载 [YingBoxTV-1.0.0.apk](https://github.com/Eric-kbo/yingbox-tv/releases/download/v1.0.0/YingBoxTV-1.0.0.apk)，复制到 U 盘或电视可访问的位置，在电视文件管理器中打开并安装。下载页面中的 `Source code` 是源码压缩包，安装请选 `.apk` 文件。
+
+要求 Android 6.0 或以上，支持 ARM 32 位、ARM 64 位及 x86_64。三星 Tizen、LG webOS 等非 Android 系统不能安装。电视须允许从文件管理器或 U 盘安装应用。安装后在应用列表中打开「映匣」。无需注册；首页的「先体验一下」可离线查看内置的照片、GIF 和视频。
+
+也可按下文「构建」自行生成 `app/build/outputs/apk/debug/app-debug.apk`（调试版）或 `app/build/outputs/apk/release/app-release.apk`（正式版）。
 
 点击「添加源」，选择连接方式，填写名称、完整目录地址以及必要的账号、密码。可以测试连接后保存，也可以直接保存；可以绑定多个设备，在「管理源」中修改或移除连接记录。
 
