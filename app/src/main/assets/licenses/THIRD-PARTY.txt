@@ -1,4 +1,4 @@
-LocalTV 1.0.0 — third-party components
+LocalTV 1.1.0 — third-party components
 
 LibVLC for Android 3.7.7 — VideoLAN / VideoLabs
 License: GNU LGPL 2.1 or later. See LGPL-2.1.txt.
@@ -10,6 +10,7 @@ users can rebuild and relink the app against a modified LibVLC implementation.
 
 AndroidX, Jetpack Compose, Kotlin, Kotlin Coroutines — Apache License 2.0
 SMBJ 0.13.0 — Apache License 2.0 — https://github.com/hierynomus/smbj
+ZXing Core 3.5.3 — Apache License 2.0 — https://github.com/zxing/zxing
 ASN.1 / ASN-one 0.6.0 — Apache License 2.0
 OkHttp 4.12.0 / Okio 3.6.0 — Apache License 2.0 — https://square.github.io/okhttp/
 Glide 4.16.0 — BSD-style / Apache License 2.0. See Glide-LICENSE.txt for upstream license.

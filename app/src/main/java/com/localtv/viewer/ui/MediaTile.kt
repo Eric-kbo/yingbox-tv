@@ -30,24 +30,26 @@ fun MediaTile(source: Source, item: MediaEntry, app: LocalTvApp, modifier: Modif
     var thumbnail by remember(item.fingerprint, source.id) { mutableStateOf<java.io.File?>(null) }
     if (item.kind == MediaKind.VIDEO) LaunchedEffect(item.fingerprint, source.id) { thumbnail = app.thumbnails.thumbnail(source, item) }
     Card(onClick = onClick, modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.colors(containerColor = Panel, focusedContainerColor = PanelSoft, contentColor = TextMain, focusedContentColor = TextMain),
-        shape = CardDefaults.shape(RoundedCornerShape(14.dp)), scale = CardDefaults.scale(focusedScale = 1.045f),
-        border = CardDefaults.border(focusedBorder = Border(border = androidx.compose.foundation.BorderStroke(2.dp, Mint), shape = RoundedCornerShape(14.dp)))) {
+        colors = CardDefaults.colors(containerColor = Color.Transparent, focusedContainerColor = PanelSoft, contentColor = TextMain, focusedContentColor = TextMain),
+        shape = CardDefaults.shape(RoundedCornerShape(8.dp)), scale = CardDefaults.scale(focusedScale = 1.025f),
+        border = CardDefaults.border(focusedBorder = Border(border = androidx.compose.foundation.BorderStroke(2.dp, TextMain), shape = RoundedCornerShape(8.dp)))) {
         Column {
-            Box(Modifier.fillMaxWidth().aspectRatio(16f / 10f).background(if (item.kind == MediaKind.FOLDER) PanelSoft else Color(0xFF18202C)), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxWidth().aspectRatio(4f / 3f).clip(RoundedCornerShape(6.dp)).background(Panel), contentAlignment = Alignment.Center) {
                 MediaGlyph(when (item.kind) { MediaKind.FOLDER -> Glyph.FOLDER; MediaKind.PHOTO -> Glyph.PHOTO; MediaKind.VIDEO -> Glyph.VIDEO }, Modifier.size(if (item.kind == MediaKind.FOLDER) 48.dp else 36.dp), if (item.kind == MediaKind.FOLDER) Mint else TextMuted.copy(alpha = .45f))
                 if (item.kind == MediaKind.PHOTO) MediaImage(app.mediaServer.url(source, item), cacheKey(source, item), Modifier.fillMaxSize(), crop = true)
                 if (thumbnail != null) MediaImage(thumbnail!!, cacheKey(source, item), Modifier.fillMaxSize(), crop = true)
-                if (item.kind != MediaKind.FOLDER) {
-                    Box(Modifier.align(Alignment.TopEnd).padding(8.dp).background(Color.Black.copy(alpha = .58f), RoundedCornerShape(5.dp)).padding(horizontal = 7.dp, vertical = 3.dp)) {
-                        Text(if (item.kind == MediaKind.VIDEO) "▶ 视频" else item.extension.uppercase(), color = Color.White, fontSize = 9.sp)
+                if (item.kind == MediaKind.VIDEO || item.extension == "gif") {
+                    Box(Modifier.align(Alignment.BottomEnd).padding(6.dp).background(Color.Black.copy(alpha = .5f), RoundedCornerShape(4.dp)).padding(horizontal = 5.dp, vertical = 2.dp)) {
+                        Text(if (item.kind == MediaKind.VIDEO) "▶" else "GIF", color = Color.White, fontSize = 9.sp)
                     }
                 }
             }
-            Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
-                Text(item.name, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Spacer(Modifier.height(5.dp))
-                Text(if (item.kind == MediaKind.FOLDER) "文件夹" else readableSize(item.size).ifBlank { "点击查看" }, fontSize = 10.sp, color = TextMuted, maxLines = 1)
+            Column(Modifier.padding(horizontal = 7.dp, vertical = 7.dp)) {
+                Text(item.name, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Spacer(Modifier.height(3.dp))
+                val date = remember(item.modifiedAt) { item.modifiedAt.takeIf { it > 0 }?.let {
+                    java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault()).toLocalDate().toString() } }
+                Text(if (item.kind == MediaKind.FOLDER) "文件夹" else date ?: readableSize(item.size), fontSize = 9.sp, color = TextMuted, maxLines = 1)
             }
         }
     }

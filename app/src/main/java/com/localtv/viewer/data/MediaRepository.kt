@@ -64,7 +64,8 @@ class MediaRepository(private val context: Context) : Closeable {
                     if (name == "." || name == ".." || name.contains('/') || name.contains('\\')) return@mapNotNull null
                     val folder = file.fileAttributes and FileAttributes.FILE_ATTRIBUTE_DIRECTORY.value != 0L
                     val kind = if (folder) MediaKind.FOLDER else MediaFormats.kind(name) ?: return@mapNotNull null
-                    MediaEntry(listOf(path, name).filter { it.isNotEmpty() }.joinToString("/"), name, kind, file.endOfFile, file.lastWriteTime.toString())
+                    MediaEntry(listOf(path, name).filter { it.isNotEmpty() }.joinToString("/"), name, kind, file.endOfFile,
+                        file.lastWriteTime.toString(), file.lastWriteTime.toEpochMillis().coerceAtLeast(0))
                 }.sortedWith(mediaComparator)
             } catch (error: Throwable) { invalidate(source.id); throw error }
         }

@@ -14,8 +14,8 @@ android {
         applicationId = "com.localtv.viewer"
         minSdk = 23
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86_64") }
     }
@@ -60,6 +60,7 @@ dependencies {
     implementation("com.hierynomus:smbj:0.13.0")
     implementation("org.slf4j:slf4j-nop:2.0.9")
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("com.google.zxing:core:3.5.3")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")

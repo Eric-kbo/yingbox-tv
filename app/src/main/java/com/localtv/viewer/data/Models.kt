@@ -34,6 +34,7 @@ data class MediaEntry(
     val kind: MediaKind,
     val size: Long = -1,
     val modified: String = "",
+    val modifiedAt: Long = MediaTime.parse(modified),
 ) {
     val extension: String get() = name.substringAfterLast('.', "").lowercase(Locale.ROOT)
     val fingerprint: String get() = "$path:$size:$modified"

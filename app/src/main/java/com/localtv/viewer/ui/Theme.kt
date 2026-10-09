@@ -17,12 +17,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.*
 
-val Background = Color(0xFF10151E)
-val Panel = Color(0xFF1B2330)
-val PanelSoft = Color(0xFF222D3D)
-val Mint = Color(0xFF77E8C5)
-val TextMain = Color(0xFFF3F6FA)
-val TextMuted = Color(0xFF9BAAC0)
+val Background = Color(0xFF101012)
+val Panel = Color(0xFF202023)
+val PanelSoft = Color(0xFF303034)
+val Mint = Color(0xFFB6CFFF)
+val TextMain = Color(0xFFF5F5F7)
+val TextMuted = Color(0xFFA1A1A6)
 val ErrorColor = Color(0xFFFFB7B0)
 
 @Composable
@@ -36,12 +36,12 @@ fun TvTheme(content: @Composable () -> Unit) {
 @Composable
 fun TvButton(label: String, modifier: Modifier = Modifier, selected: Boolean = false, enabled: Boolean = true, onClick: () -> Unit) {
     Button(onClick = onClick, enabled = enabled, modifier = modifier.heightIn(min = 42.dp),
-        colors = ButtonDefaults.colors(containerColor = if (selected) PanelSoft else Panel,
-            contentColor = if (selected) Mint else TextMain, focusedContainerColor = Mint, focusedContentColor = Background),
-        scale = ButtonDefaults.scale(focusedScale = 1.04f),
-        shape = ButtonDefaults.shape(shape = RoundedCornerShape(12.dp)),
-        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp)) {
-        Text(label, fontSize = 14.sp)
+        colors = ButtonDefaults.colors(containerColor = if (selected) PanelSoft else Color.Transparent,
+            contentColor = TextMain, focusedContainerColor = TextMain, focusedContentColor = Background),
+        scale = ButtonDefaults.scale(focusedScale = 1.025f),
+        shape = ButtonDefaults.shape(shape = RoundedCornerShape(9.dp)),
+        contentPadding = PaddingValues(horizontal = 15.dp, vertical = 8.dp)) {
+        Text(label, fontSize = 13.sp)
     }
 }
 

@@ -1,4 +1,4 @@
-"""Operate the TV app over ADB; credentials enter through stdin, never log them."""
+"""ADB state/keys helper. Legacy v1.0 form filling; v1.1 uses pair_tv_source.py."""
 from pathlib import Path
 import json
 import re
@@ -18,7 +18,9 @@ def adb(*args):
     return result.stdout
 
 def state():
-    adb("shell", "uiautomator dump /data/local/tmp/localtv-setup-ui.xml")
+    output = adb("shell", "uiautomator dump /data/local/tmp/localtv-setup-ui.xml")
+    if b"UI hierchary dumped" not in output and b"UI hierarchy dumped" not in output:
+        raise RuntimeError("TV UI is not available; refusing to reuse an older hierarchy")
     return ET.fromstring(adb("shell", "cat /data/local/tmp/localtv-setup-ui.xml"))
 
 def key(*codes):
@@ -54,6 +56,8 @@ elif action == "keys":
     key(*sys.argv[2:])
     snapshot("tv-current")
 elif action == "fill":
+    if b"versionName=1.0.0" not in adb("shell", "dumpsys", "package", "com.localtv.viewer"):
+        raise SystemExit("This fill action only supports v1.0. Use pair_tv_source.py with the v1.1 phone-pairing page.")
     credentials = json.load(sys.stdin)
     field(0, sys.argv[2])
     field(1, sys.argv[3])
