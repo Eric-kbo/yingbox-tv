@@ -1,0 +1,22 @@
+LocalTV 1.0.0 — third-party components
+
+LibVLC for Android 3.7.7 — VideoLAN / VideoLabs
+License: GNU LGPL 2.1 or later. See LGPL-2.1.txt.
+Source and build system: https://code.videolan.org/videolan/vlc-android
+Upstream VLC engine: https://code.videolan.org/videolan/vlc
+Binary: https://repo.maven.apache.org/maven2/org/videolan/android/libvlc-all/3.7.7/
+The LocalTV source project and Gradle build files are supplied with the APK so
+users can rebuild and relink the app against a modified LibVLC implementation.
+
+AndroidX, Jetpack Compose, Kotlin, Kotlin Coroutines — Apache License 2.0
+SMBJ 0.13.0 — Apache License 2.0 — https://github.com/hierynomus/smbj
+ASN.1 / ASN-one 0.6.0 — Apache License 2.0
+OkHttp 4.12.0 / Okio 3.6.0 — Apache License 2.0 — https://square.github.io/okhttp/
+Glide 4.16.0 — BSD-style / Apache License 2.0. See Glide-LICENSE.txt for upstream license.
+SLF4J 2.0.9 — MIT license — https://www.slf4j.org/license.html
+Bouncy Castle 1.75 — MIT-style license — https://www.bouncycastle.org/licence.html
+MBassador 1.3.0 — MIT license — https://github.com/bennidi/mbassador
+
+The offline demonstration images, GIF and video were generated specifically
+for this project from original procedural artwork. They contain no external
+photos, films or licensed music.
