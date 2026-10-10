@@ -129,9 +129,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     suspend fun testSource(source: Source): Result<Int> = withContext(Dispatchers.IO) {
         runCatching {
-            // Separate id prevents a form test from invalidating an active source connection.
-            val temporary = source.copy(id = "test-${java.util.UUID.randomUUID()}")
-            try { app.repository.list(temporary).size } finally { app.repository.invalidate(temporary.id) }
+            // Validation owns a separate SMB client; even closing or failing the
+            // connection cannot interrupt another saved source on the same PC.
+            MediaRepository(app).use { it.list(source).size }
         }
     }
 
@@ -141,6 +141,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (index < 0) changed.add(source) else changed[index] = source
         app.store.save(changed)
         app.repository.invalidate(source.id)
+        app.playbackRepository.invalidate(source.id)
         app.mediaServer.invalidate(source.id)
         withContext(Dispatchers.Main) {
             directoryCache.keys.filter { it.startsWith("${source.id}:") }.forEach(directoryCache::remove)
@@ -155,6 +156,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val changed = _sources.value.filter { it.id != source.id }
                 app.store.save(changed)
                 app.repository.invalidate(source.id)
+                app.playbackRepository.invalidate(source.id)
                 app.mediaServer.invalidate(source.id)
                 withContext(Dispatchers.Main) { _sources.value = changed }
             }

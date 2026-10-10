@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import com.localtv.viewer.data.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
@@ -13,8 +14,8 @@ import java.io.File
 
 class ThumbnailCache(context: Context, private val server: MediaServer) {
     private val directory = File(context.cacheDir, "video-thumbnails").apply { mkdirs() }
-    private val semaphore = Semaphore(2)
-    private val failures = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+    private val semaphore = Semaphore(1)
+    private val failures = java.util.Collections.newSetFromMap(java.util.concurrent.ConcurrentHashMap<String, Boolean>())
     private val context = context.applicationContext
 
     suspend fun thumbnail(source: Source, item: MediaEntry): File? = withContext(Dispatchers.IO) {
@@ -23,6 +24,9 @@ class ThumbnailCache(context: Context, private val server: MediaServer) {
         if (file.exists()) return@withContext file
         if (key in failures) return@withContext null
         semaphore.withPermit {
+            kotlinx.coroutines.currentCoroutineContext().ensureActive()
+            while ((context as LocalTvApp).videoActive.get()) kotlinx.coroutines.delay(250)
+            kotlinx.coroutines.currentCoroutineContext().ensureActive()
             if (file.exists()) return@withPermit file
             val retriever = MediaMetadataRetriever()
             try {

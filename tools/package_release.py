@@ -15,17 +15,23 @@ version = metadata["elements"][0]["versionName"]
 assert re.fullmatch(r"\d+\.\d+\.\d+", version)
 result = (ROOT / "test-final.log").read_text(encoding="utf-8-sig", errors="replace")
 passed = re.search(r"OK \((\d+) tests\)", result)
-if not passed or "FAILURES!!!" in result:
+if not passed or int(passed.group(1)) < 13 or "FAILURES!!!" in result:
     raise SystemExit("Final Android TV integration suite must pass before packaging")
 unit_count = 0
 for report in (ROOT / "app/build/test-results/testDebugUnitTest").glob("TEST-*.xml"):
     unit = ET.parse(report).getroot()
     assert unit.get("failures") == "0" and unit.get("errors") == "0" and unit.get("skipped") == "0"
     unit_count += int(unit.get("tests"))
-assert unit_count >= 14
+assert unit_count >= 18
+tv_result = (ROOT / "tv-regression-final.log").read_text(encoding="utf-8-sig", errors="replace")
+assert "OK (4 tests)" in tv_result and "FAILURES!!!" not in tv_result
+focused_result = (ROOT / "test-focused-final.log").read_text(encoding="utf-8-sig", errors="replace")
+assert "OK (1 test)" in focused_result and "FAILURES!!!" not in focused_result
 assert "BUILD SUCCESSFUL" in (ROOT / "build-final.log").read_text(encoding="utf-8-sig", errors="replace")
 signature = (ROOT / "signature-verify.log").read_text(encoding="utf-8-sig", errors="replace")
 assert signature.startswith("Verifies")
+assert "Verification successful" in (ROOT / "alignment-verify.log").read_text(encoding="utf-8-sig", errors="replace")
+assert "All 64-bit native libraries support 16 KiB LOAD alignment" in (ROOT / "native-alignment-final.log").read_text(encoding="utf-8-sig", errors="replace")
 apk = DEST / f"YingBoxTV-{version}.apk"
 shutil.copyfile(ROOT / "app/build/outputs/apk/release/app-release.apk", apk)
 paths = [ROOT / name for name in ["README.md", "RELEASE_NOTES.md", f"QA-{version}.md", ".gitignore", "build.gradle.kts", "settings.gradle.kts", "gradle.properties", "gradlew", "gradlew.bat", "app/build.gradle.kts", "app/proguard-rules.pro"]]
@@ -46,7 +52,10 @@ for path in (apk, source):
     (DEST / (path.name + ".sha256")).write_text(digest + "  " + path.name + "\n", encoding="utf-8")
     print(path.name, f"{path.stat().st_size / 1048576:.1f} MiB", digest)
 shutil.copyfile(ROOT / "test-final.log", DEST / f"Android-TV-test-results-{version}.txt")
+shutil.copyfile(ROOT / "tv-regression-final.log", DEST / f"TV-device-test-results-{version}.txt")
+shutil.copyfile(ROOT / "test-focused-final.log", DEST / f"Playback-UI-test-results-{version}.txt")
 shutil.copyfile(ROOT / "signature-verify.log", DEST / f"APK-signature-{version}.txt")
+shutil.copyfile(ROOT / "native-alignment-final.log", DEST / f"Native-library-alignment-{version}.txt")
 shutil.copyfile(ROOT / "app/build/reports/lint-results-release.txt", DEST / f"Android-lint-{version}.txt")
 instructions = (ROOT / "RELEASE_NOTES.md").read_text(encoding="utf-8")
 (DEST / f"交付说明-{version}.txt").write_text(instructions, encoding="utf-8-sig")

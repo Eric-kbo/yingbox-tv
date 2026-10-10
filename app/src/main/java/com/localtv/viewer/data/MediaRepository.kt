@@ -31,8 +31,12 @@ class MediaRepository(private val context: Context) : Closeable {
         .withSoTimeout(25, TimeUnit.SECONDS).withReadBufferSize(1024 * 1024).build())
     private val connections = ConcurrentHashMap<String, SmbSession>()
     private val locks = ConcurrentHashMap<String, Any>()
+    private val readExecutor = java.util.concurrent.Executors.newFixedThreadPool(4) { work ->
+        Thread(work, "LocalTV-smb-prefetch").apply { isDaemon = true }
+    }
 
     private class SmbSession(val connection: Connection, val session: Session, val share: DiskShare, val base: String) : Closeable {
+        // SMBJ leases a shared connection per connect(); release that lease as well.
         override fun close() { runCatching { share.close() }; runCatching { session.close() }; runCatching { connection.close() } }
         fun path(relative: String): String = listOf(base, checkedRelativePath(relative)).filter { it.isNotEmpty() }.joinToString("/").replace('/', '\\')
     }
@@ -43,15 +47,17 @@ class MediaRepository(private val context: Context) : Closeable {
         val uri = URI(source.address)
         val segments = decodePath(uri.rawPath).trim('/').split('/')
         val connection = smbClient.connect(uri.host, if (uri.port > 0) uri.port else 445)
+        var authenticated: Session? = null
         try {
             val domain = source.domain.ifBlank { source.username.substringBefore('\\', "") }
             val username = source.username.substringAfter('\\', source.username)
             val auth = if (username.isBlank() && source.password.isBlank()) AuthenticationContext.anonymous()
                 else AuthenticationContext(username, source.password.toCharArray(), domain)
             val session = connection.authenticate(auth)
+            authenticated = session
             val share = session.connectShare(segments.first()) as? DiskShare ?: throw IOException("这个共享不是文件目录")
             SmbSession(connection, session, share, segments.drop(1).joinToString("/")).also { connections[source.id] = it }
-        } catch (error: Throwable) { runCatching { connection.close() }; throw error }
+        } catch (error: Throwable) { runCatching { authenticated?.close() }; runCatching { connection.close() }; throw error }
     }
 
     fun list(source: Source, path: String = ""): List<MediaEntry> = when (source.kind) {
@@ -95,17 +101,12 @@ class MediaRepository(private val context: Context) : Closeable {
             val file = session.share.openFile(session.path(item.path), EnumSet.of(AccessMask.FILE_READ_DATA, AccessMask.FILE_READ_ATTRIBUTES),
                 EnumSet.noneOf(FileAttributes::class.java), EnumSet.allOf(SMB2ShareAccess::class.java),
                 SMB2CreateDisposition.FILE_OPEN, EnumSet.of(SMB2CreateOptions.FILE_NON_DIRECTORY_FILE))
-            var position = start
-            val input = object : InputStream() {
-                override fun read(): Int { val byte = ByteArray(1); return if (read(byte, 0, 1) < 0) -1 else byte[0].toInt() and 0xff }
-                override fun read(b: ByteArray, off: Int, len: Int): Int {
-                    if (len == 0) return 0
-                    val n = file.read(b, position, off, len)
-                    if (n > 0) position += n
-                    return n
-                }
-            }
-            ReadHandle(input) { file.close() }
+            try {
+                val available = (size(source, item) - start).coerceAtLeast(0)
+                val length = count?.coerceAtMost(available) ?: available
+                val input = ReadAheadInputStream(start, length, readExecutor) { bytes, offset, wanted -> file.read(bytes, offset, 0, wanted) }
+                ReadHandle(input) { file.close() }
+            } catch (error: Throwable) { file.close(); throw error }
         }
         SourceKind.DEMO -> {
             val input = context.assets.open("demo/${checkedRelativePath(item.path)}")
@@ -114,7 +115,7 @@ class MediaRepository(private val context: Context) : Closeable {
     }
 
     fun invalidate(sourceId: String) { connections.remove(sourceId)?.close() }
-    override fun close() { connections.values.forEach { it.close() }; connections.clear(); smbClient.close() }
+    override fun close() { readExecutor.shutdownNow(); connections.values.forEach { it.close() }; connections.clear(); smbClient.close() }
 }
 
 fun skipExactly(input: InputStream, count: Long) {

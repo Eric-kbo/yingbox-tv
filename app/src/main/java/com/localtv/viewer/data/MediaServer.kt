@@ -20,8 +20,8 @@ class MediaServer(private val repository: MediaRepository) : Closeable {
     private val server = ServerSocket(0, 24, InetAddress.getByName("127.0.0.1"))
     private val tickets = ConcurrentHashMap<String, Ticket>()
     private val tokens = ConcurrentHashMap<String, String>()
-    private val sockets = ConcurrentHashMap.newKeySet<Socket>()
-    private val pool = ThreadPoolExecutor(2, 12, 30, TimeUnit.SECONDS, ArrayBlockingQueue(64),
+    private val sockets = java.util.Collections.newSetFromMap(ConcurrentHashMap<Socket, Boolean>())
+    private val pool = ThreadPoolExecutor(6, 6, 30, TimeUnit.SECONDS, ArrayBlockingQueue(32),
         { work -> Thread(work, "LocalTV-media").apply { isDaemon = true } }, ThreadPoolExecutor.AbortPolicy())
     @Volatile var lastError: String? = null
         private set

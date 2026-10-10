@@ -7,8 +7,17 @@ import com.localtv.viewer.data.SourceStore
 import org.videolan.libvlc.LibVLC
 
 class LocalTvApp : Application() {
+    val videoActive = java.util.concurrent.atomic.AtomicBoolean(false)
+    val playerCleanup = java.util.concurrent.Executors.newSingleThreadExecutor { work -> Thread(work, "LocalTV-player-cleanup").apply { isDaemon = true } }
+    override fun onCreate() {
+        super.onCreate()
+        com.localtv.viewer.images.HeifDecoders.install(com.bumptech.glide.Glide.get(this))
+    }
     val store by lazy { SourceStore(this) }
     val repository by lazy { MediaRepository(this) }
+    // Browsing can leave slow thumbnail reads in flight. Playback has its own SMB
+    // connection/credit window so those requests cannot block opening a movie.
+    val playbackRepository by lazy { MediaRepository(this) }
     val mediaServer by lazy { MediaServer(repository) }
     val thumbnails by lazy { ThumbnailCache(this, mediaServer) }
     // Shared native engine avoids repeatedly initializing codecs when moving between files.

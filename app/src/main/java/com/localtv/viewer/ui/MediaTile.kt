@@ -69,7 +69,7 @@ fun MediaImage(data: Any, signature: String, modifier: Modifier = Modifier, crop
         if (image.tag != identity) {
             image.tag = identity
             image.scaleType = if (crop) ImageView.ScaleType.CENTER_CROP else ImageView.ScaleType.FIT_CENTER
-            val request = Glide.with(image).load(data).signature(ObjectKey(signature)).dontAnimate()
+            val request = Glide.with(image).load(data).signature(ObjectKey(signature + ":decoder-v2")).dontAnimate()
                 .listener(object : RequestListener<Drawable> {
                     override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean { failed(); return false }
                     override fun onResourceReady(resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean): Boolean { loaded(); return false }

@@ -2,15 +2,15 @@
 
 一个使用 Kotlin 和 Jetpack Compose for TV 开发的原生 Android 电视照片、视频查看器。
 
-当前本地版本为 1.1.0，交付安装包 `dist/YingBoxTV-1.1.0.apk`；更新内容见 [RELEASE_NOTES.md](RELEASE_NOTES.md)。
+当前本地版本为 1.2.0，交付安装包 `dist/YingBoxTV-1.2.0.apk`；更新内容见 [RELEASE_NOTES.md](RELEASE_NOTES.md)。
 
 ## 安装与使用
 
-使用本次交付的 `YingBoxTV-1.1.0.apk`，复制到 U 盘或电视可访问的位置，在电视文件管理器中打开并安装。已发布的 1.0.0 仍可从 [GitHub Releases](https://github.com/Eric-kbo/yingbox-tv/releases) 或 [YingBoxTV-1.0.0.apk](https://github.com/Eric-kbo/yingbox-tv/releases/download/v1.0.0/YingBoxTV-1.0.0.apk) 下载。下载页面中的 `Source code` 是源码压缩包，安装请选 `.apk` 文件。
+使用本次交付的 `YingBoxTV-1.2.0.apk`，复制到 U 盘或电视可访问的位置，在电视文件管理器中打开并安装。已发布的 1.0.0 仍可从 [GitHub Releases](https://github.com/Eric-kbo/yingbox-tv/releases) 或 [YingBoxTV-1.0.0.apk](https://github.com/Eric-kbo/yingbox-tv/releases/download/v1.0.0/YingBoxTV-1.0.0.apk) 下载。下载页面中的 `Source code` 是源码压缩包，安装请选 `.apk` 文件。
 
 要求 Android 6.0 或以上，支持 ARM 32 位、ARM 64 位及 x86_64。三星 Tizen、LG webOS 等非 Android 系统不能安装。电视须允许从文件管理器或 U 盘安装应用。安装后在应用列表中打开「映匣」。无需注册；首页的「先体验一下」可离线查看内置的照片、GIF 和视频。
 
-也可按下文「构建」自行生成 `app/build/outputs/apk/debug/app-debug.apk`（调试版）或 `app/build/outputs/apk/release/app-release.apk`（正式版）。
+也可按下文「构建」自行生成 `app/build/outputs/apk/debug/app-debug.apk`（验证版，独立包名 `com.localtv.viewer.dev`，与正式版数据隔离）或 `app/build/outputs/apk/release/app-release.apk`（正式版）。
 
 1.1.0：点击「添加源」，默认显示手机二维码。手机与电视连接同一网络，扫码后在浏览器填写共享地址和必要的账号、密码，点击「连接并保存到电视」。应用先验证目录，再自动保存到电视；名称可留空，默认使用文件夹名称。无需安装手机端应用。
 
@@ -32,7 +32,7 @@ SMB 可填写共享后的子目录、端口和 Windows 域；也支持 `\\设备
 | 视频：确认键 | 暂停 / 继续，结束后重播 |
 | 视频：← / → | 后退 / 前进 10 秒，长按连续跳转 |
 | 照片：确认键 | 开始 / 停止每 7 秒的幻灯片 |
-| 菜单键 | 显示播放信息；在源卡片上打开修改 |
+| 菜单键 | 视频播放设置；在源卡片上打开修改 |
 | 返回键 | 退出全屏、上一级目录、返回源列表 |
 | 源卡片：长按确认键 | 修改该源 |
 
@@ -40,25 +40,37 @@ SMB 可填写共享后的子目录、端口和 Windows 域；也支持 `\\设备
 
 ## 格式与性能
 
-照片识别 JPG / JPEG、PNG、WebP、GIF、BMP、HEIC / HEIF、AVIF。GIF 支持动画；HEIC、AVIF 的解码能力取决于电视的 Android 版本。TIFF、相机 RAW 未在本版本实现。
+照片识别 JPG / JPEG、PNG、WebP、GIF、BMP、HEIC / HEIF、AVIF。GIF 支持动画；HEIC、AVIF 使用平台解码，并在支持的系统 / 架构上提供软件回退，具体限制见下文。TIFF、相机 RAW 未在本版本实现。
 
-视频使用 LibVLC，识别 MP4、MKV、MOV、AVI、WebM、TS、M2TS、MTS、MPEG、VOB、FLV、WMV、ASF、3GP、OGV、RM / RMVB 等常见文件类型。具体能否流畅播放还取决于文件内部的视频 / 音频编码、电视硬件和网络带宽。优先硬件解码；4K、HDR、AV1 等未在实体电视上验证，不能保证所有格式及编码组合都能播放。内嵌字幕由播放器处理，本版本没有音轨 / 字幕选择界面或外挂字幕管理。
+视频使用 Media3 原生播放及 LibVLC 兼容引擎，识别 MP4、MKV、MOV、AVI、WebM、TS、M2TS、MTS、MPEG、VOB、FLV、WMV、ASF、3GP、OGV、RM / RMVB 等常见文件类型。具体能否流畅播放还取决于文件内部的视频 / 音频编码、电视硬件和网络带宽。已在小米电视验证一段 4K 60fps Dolby Vision / HLG 视频；AV1 视频尚未实机验证，不能保证所有格式及编码组合都能播放。原生模式可选择音轨和内嵌字幕，本版本没有外挂字幕管理。
 
 文件夹优先，照片和视频默认按文件时间从新到旧排列；时间缺失的文件放在末尾，同一时间按名称自然排序。这里的时间是 SMB 的 LastWriteTime 或 WebDAV 的 getlastmodified，不是 EXIF 拍摄日期。可在「搜索与筛选」切换最早优先或名称排序，每个源记住排序选择。
 
 支持照片 / 视频类型、文件名关键字、年份 / 月份、最近 7 / 30 / 365 天及扩展名格式组合筛选。筛选仅作用于当前文件夹，不递归扫描子目录。「按月定位」可直接跳到列表中对应月份，在时间排序下提供。筛选结果内仍支持上下键连续查看。
 
-目录的时间索引、排序与筛选在后台执行，重复筛选使用内存元数据，不重新访问网络；焦点定位与播放序列用路径索引，避免遥控器每次移动都遍历完整列表。目录缓存最多 6 个或合计约 60,000 条，单个超大目录仍可使用。列表使用五列懒加载网格。缩略图异步读取并缓存，视频缩略图最多同时生成两个，缓存限制约 100 MB。播放按需分段读取，不先下载完整影片。
+目录的时间索引、排序与筛选在后台执行，重复筛选使用内存元数据，不重新访问网络；焦点定位与播放序列用路径索引，避免遥控器每次移动都遍历完整列表。目录缓存最多 6 个或合计约 60,000 条，单个超大目录仍可使用。列表使用五列懒加载网格。缩略图异步读取并缓存，视频缩略图最多同时生成一个，播放视频时暂停新的缩略图生成，缓存限制约 100 MB。播放按需分段读取，不先下载完整影片。
 
-本机保存源设置；密码使用 Android Keystore 和 AES-GCM 加密，禁用系统备份。不连接开发者服务器，不收集账号或媒体内容；源设备只进行读取。HTTP 和 SMB 的传输安全取决于源及网络，远程连接建议使用 HTTPS WebDAV。播放器通过只监听本机回环地址的随机端口读取媒体，使用随机令牌，不把来源密码写进播放地址。
+本机保存源设置；密码使用 Android Keystore 和 AES-GCM 加密，禁用系统备份。不连接开发者服务器，不收集账号或媒体内容；源设备只进行读取。HTTP 和 SMB 的传输安全取决于源及网络，远程连接建议使用 HTTPS WebDAV。原生视频引擎直接读取 SMB / WebDAV，使用独立读取连接与有界预读；照片和兼容引擎通过只监听本机回环地址的随机端口读取，使用随机令牌，不把来源密码写进播放地址。
 
 扫码添加使用电视临时开放的局域网 HTTP 页面，含随机令牌、来源 / Host 检查、请求大小限制和有限工作线程；只在扫码页面打开时运行。手机填写的密码不会写入链接、浏览器持久存储或应用日志。此连接是局域网明文 HTTP，请在自己的可信网络内使用。已有源和加密密码可通过同签名覆盖安装保留。
+
+## 1.2.0 播放与照片兼容性
+
+常用视频默认使用 AndroidX Media3、电视硬件解码器和 SurfaceView 输出，保留 HDR / Dolby Vision 色彩元数据。AVI、WMV 等部分旧格式使用 LibVLC 兼容模式；遇到不受支持的普通视频容器 / 解码器时会回退，HDR 解码失败时不会静默回退。
+
+播放时左右键预览跳转位置，连续按键合并为一次跳转；确认键暂停、继续或重播，上下键切换内容。「菜单」打开播放设置，可选择音轨、内嵌字幕、适合 / 填满屏幕及原生 / 兼容播放。INFO 键只显示状态。灰色进度显示已缓冲范围，白色进度显示当前位置。兼容模式下缩放及播放切换仍可使用。
+
+预读每块最多 1 MiB，每个流只预读一块，绝不越过文件大小或请求范围。原生播放器媒体缓冲目标上限 64 MiB（实际总内存还包含解码器、帧缓冲与索引），缓冲时长目标 15–45 秒，起播目标 1.5 秒、再次缓冲目标 3 秒；内存上限可使高码率文件的实际预存时长更短。设置页的读取速度来自媒体读取等待时间，属于诊断采样，不是 Wi-Fi 协商速率。
+
+HEIC / HEIF 优先使用平台解码器；不支持的图像在 Android 7+ 的 ARM 设备上回退到独立软件解码器，支持分块图像、较大分辨率和高位深内容；平台和软件解码均失败时显示可重试的错误。x86_64 使用平台 HEIC 解码回退。标准照片、GIF 的原有解码仍保留。软件 HEIC 同时仅解码一张，按展示尺寸缩放；单个输入上限 64 MiB、图像上限 1 亿像素。HDR 照片当前以 SDR 位图显示，不保留增益图。无法承诺所有编码和文件均能播放，视频能力仍取决于电视硬件与厂商实现。
 
 ## 工程结构
 
 - `browser/`：不可变目录索引、筛选条件、月份定位、浏览状态和排序偏好。
 - `pairing/`：添加源草稿与名称生成、临时局域网表单服务器、电视网络地址选择。
 - `data/`：SMB / WebDAV 读取、源持久化、HTTP 分段、文件时间解析。
+- `playback/`：Media3 直接数据源、读取统计与分段读取。
+- `images/`：平台解码及 HEIC / HEIF / AVIF 软件回退。
 - `ui/`：资料库、浏览页、筛选弹窗、添加源和全屏播放，分别组织。
 - `MainViewModel`：目录 / 查询任务取消、旧结果隔离、缓存与播放状态。
 
@@ -93,10 +105,10 @@ WebDAV 测试源：安装 Python `Pillow`、`imageio-ffmpeg`，执行 `python to
 ./gradlew.bat :app:assembleDebug :app:assembleDebugAndroidTest
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
-adb shell am instrument -w com.localtv.viewer.test/androidx.test.runner.AndroidJUnitRunner
+adb shell am instrument -w com.localtv.viewer.dev.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
-本地交付包的最终验证结果见 `dist/测试与交付说明.txt`（`dist/` 不提交到源码仓库）。模拟器验证不能代替具体品牌电视的硬件解码及遥控器适配验证。
+本地交付包的最终验证结果见 `dist/QA-1.2.0.md`（`dist/` 不提交到源码仓库）。模拟器验证不能代替具体品牌电视的硬件解码及遥控器适配验证。
 
 ## 第三方许可
 
