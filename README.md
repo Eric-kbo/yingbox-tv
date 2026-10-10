@@ -2,11 +2,11 @@
 
 一个使用 Kotlin 和 Jetpack Compose for TV 开发的原生 Android 电视照片、视频查看器。
 
-当前本地版本为 1.2.0，交付安装包 `dist/YingBoxTV-1.2.0.apk`；更新内容见 [RELEASE_NOTES.md](RELEASE_NOTES.md)。
+当前版本为 1.2.0；更新内容见 [RELEASE_NOTES.md](RELEASE_NOTES.md)。
 
 ## 安装与使用
 
-使用本次交付的 `YingBoxTV-1.2.0.apk`，复制到 U 盘或电视可访问的位置，在电视文件管理器中打开并安装。已发布的 1.0.0 仍可从 [GitHub Releases](https://github.com/Eric-kbo/yingbox-tv/releases) 或 [YingBoxTV-1.0.0.apk](https://github.com/Eric-kbo/yingbox-tv/releases/download/v1.0.0/YingBoxTV-1.0.0.apk) 下载。下载页面中的 `Source code` 是源码压缩包，安装请选 `.apk` 文件。
+从 [GitHub Releases](https://github.com/Eric-kbo/yingbox-tv/releases/latest) 下载最新正式安装包，或直接下载 [YingBoxTV-1.2.0.apk](https://github.com/Eric-kbo/yingbox-tv/releases/download/v1.2.0/YingBoxTV-1.2.0.apk)，复制到 U 盘或电视可访问的位置，在电视文件管理器中打开并安装。下载页面中的 `Source code` 是源码压缩包，安装请选 `.apk` 文件。同签名覆盖升级保留原有媒体源、加密密码和浏览偏好。
 
 要求 Android 6.0 或以上，支持 ARM 32 位、ARM 64 位及 x86_64。三星 Tizen、LG webOS 等非 Android 系统不能安装。电视须允许从文件管理器或 U 盘安装应用。安装后在应用列表中打开「映匣」。无需注册；首页的「先体验一下」可离线查看内置的照片、GIF 和视频。
 
